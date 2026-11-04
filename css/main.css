@@ -1,0 +1,498 @@
+:root {
+  /* Paleta de consola médica. El texto va sobre --fondo o --panel. */
+  --fondo: #02060c;
+  --panel: #07131c;
+  --panel-2: #0c3148;
+  --texto: #e7f7ff;
+  --linea: #2f8eae;
+  --acento: #8fdfff;
+  --foco: #e9fbff;
+  --marca: #39c6ef;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--fondo);
+  color: var(--texto);
+  font-family: "Segoe UI", system-ui, sans-serif;
+}
+
+button,
+a.volver {
+  font: inherit;
+  letter-spacing: 0.04em;
+  color: var(--texto);
+  background: transparent;
+  border: 1px solid var(--linea);
+  border-radius: 2px;
+  padding: 0.45rem 0.75rem;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+button:hover,
+a.volver:hover,
+.hotspot:hover {
+  background: var(--panel-2);
+  border-color: var(--acento);
+}
+
+:focus-visible {
+  outline: 2px solid var(--foco);
+  outline-offset: 2px;
+}
+
+.solo-lectores {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.saltar-contenido {
+  position: absolute;
+  left: 1rem;
+  top: -4rem;
+  z-index: 20;
+  background: var(--panel);
+  color: var(--texto);
+  padding: 0.6rem 0.9rem;
+}
+
+.saltar-contenido:focus {
+  top: 1rem;
+}
+
+.intro {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background:
+    linear-gradient(rgba(57, 198, 239, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(57, 198, 239, 0.08) 1px, transparent 1px),
+    var(--fondo);
+  background-size: 28px 28px;
+  transition: opacity 0.8s ease;
+}
+
+.intro.saliendo {
+  opacity: 0;
+}
+
+.intro-caja {
+  max-width: 38rem;
+  background: rgba(7, 19, 28, 0.92);
+  border: 1px solid var(--linea);
+  padding: 2rem;
+  box-shadow: 0 0 0 1px rgba(143, 223, 255, 0.15), 0 0 40px rgba(26, 110, 168, 0.35);
+}
+
+.etiqueta,
+.marca,
+.serie,
+.menu-sistema,
+.placa-titulo {
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  color: var(--acento);
+}
+
+h1,
+h2 {
+  font-weight: 560;
+  line-height: 1.2;
+}
+
+.intro h1 {
+  margin: 0.4rem 0 0.8rem;
+  font-size: 2.4rem;
+  color: var(--foco);
+}
+
+.intro p {
+  line-height: 1.55;
+}
+
+.app[hidden],
+.modal[hidden],
+.intro[hidden] {
+  display: none;
+}
+
+.app {
+  min-height: 100vh;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+}
+
+.barra {
+  z-index: 5;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.55rem 0.9rem;
+  background: #041018;
+  border-bottom: 1px solid var(--linea);
+}
+
+.puesto {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 7.5rem 1fr 15rem;
+}
+
+.panel-lat {
+  border-right: 1px solid var(--linea);
+  padding: 0.8rem 0.7rem;
+  background: #041018;
+}
+
+.panel-datos {
+  border-right: 0;
+  border-left: 1px solid var(--linea);
+}
+
+.menu-sistema {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.modalidades {
+  margin: 0.8rem 0 0;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.modalidades button,
+.zoom-controles button,
+.menu-sistema button {
+  color: #8fb4c6;
+  font-size: 0.75rem;
+  padding: 0.3rem 0.45rem;
+}
+
+.modalidades button[aria-pressed="true"],
+.menu-sistema button[aria-pressed="true"],
+.tira button[aria-pressed="true"],
+.formas button[aria-pressed="true"] {
+  color: var(--foco);
+  border-color: var(--marca);
+  background: rgba(57, 198, 239, 0.22);
+  transform: scale(1.06);
+}
+
+.zoom-controles {
+  display: flex;
+  gap: 0.35rem;
+  margin: 0 0 0.8rem;
+}
+
+body.vision-clara {
+  --fondo: #0a1c28;
+  --panel: #123044;
+}
+
+.nivel {
+  margin: 0.3rem 0 1rem;
+  font-size: 1.6rem;
+  color: var(--foco);
+}
+
+.panel-datos table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78rem;
+}
+
+.panel-datos th,
+.panel-datos td {
+  border-bottom: 1px solid #16485e;
+  padding: 0.35rem 0.15rem;
+  text-align: left;
+}
+
+.panel-datos td {
+  color: var(--marca);
+}
+
+.escala {
+  margin-top: 1rem;
+  height: 8rem;
+  border: 1px solid var(--linea);
+  background: linear-gradient(#041826, #1a6ea8 55%, #e9fbff);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 0.3rem;
+  font-size: 0.68rem;
+}
+
+#contenido {
+  min-width: 0;
+  min-height: 0;
+}
+
+.escenario {
+  position: relative;
+  height: calc(100vh - 6.4rem);
+  background:
+    radial-gradient(circle at 50% 45%, rgba(26, 110, 168, 0.22), transparent 55%),
+    var(--fondo);
+}
+
+.escenario canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.pista {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+}
+
+.hotspot {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  background: rgba(4, 16, 24, 0.8);
+  font-size: 0.75rem;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.hotspot:hover,
+.hotspot:focus-visible {
+  transform: translate(-50%, -50%) scale(1.12);
+  background: rgba(26, 110, 168, 0.85);
+}
+
+.hotspot[hidden] {
+  display: none;
+}
+
+.estado {
+  position: absolute;
+  z-index: 2;
+  left: 0.8rem;
+  top: 0.8rem;
+  margin: 0;
+  color: var(--acento);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.tira {
+  display: flex;
+  gap: 0.45rem;
+  padding: 0.55rem 0.8rem;
+  border-top: 1px solid var(--linea);
+  background: #041018;
+}
+
+.escenario-fijo {
+  position: relative;
+  height: 100vh;
+  overflow: hidden;
+  border-bottom: 1px solid var(--linea);
+}
+
+.escenario-fijo h1 {
+  position: absolute;
+  z-index: 2;
+  left: 1rem;
+  bottom: 4.6rem;
+  margin: 0;
+  font-size: 1.4rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.formas {
+  position: absolute;
+  z-index: 2;
+  left: 0;
+  right: 0;
+  bottom: 0.8rem;
+  display: flex;
+  justify-content: center;
+  gap: 0.45rem;
+}
+
+.formas button[aria-pressed="true"] {
+  background: rgba(57, 198, 239, 0.2);
+  border-color: var(--acento);
+}
+
+.bloque {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.4rem;
+  align-items: center;
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 2.5rem 1.2rem 3rem;
+}
+
+.texto-bloque p {
+  line-height: 1.6;
+}
+
+.grafica {
+  margin: 0;
+  background: #041018;
+  border: 1px solid var(--linea);
+  padding: 0.9rem;
+}
+
+.grafica figcaption {
+  margin-bottom: 0.8rem;
+  color: var(--acento);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+}
+
+.chart {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.fila {
+  display: grid;
+  grid-template-columns: 7.5rem 1fr auto;
+  gap: 0.6rem;
+  align-items: center;
+}
+
+.barra-pista {
+  height: 0.45rem;
+  background: #041826;
+  border: 1px solid #16485e;
+}
+
+.barra-valor {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, #1a6ea8, #8fdfff);
+}
+
+.valor {
+  min-width: 2.5rem;
+  text-align: right;
+  color: var(--acento);
+}
+
+.punto {
+  background: transparent;
+  border: 0;
+  padding: 0.3rem 0.15rem;
+  text-align: left;
+}
+
+.punto:hover,
+.punto:focus-visible {
+  background: var(--panel-2);
+}
+
+.linea-svg {
+  width: 100%;
+  height: 180px;
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: none;
+}
+
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  place-items: center;
+  padding: 1.2rem;
+  background: rgba(2, 6, 12, 0.72);
+}
+
+.modal-panel {
+  width: min(34rem, 100%);
+  background: #07131c;
+  border: 1px solid var(--acento);
+  box-shadow: 0 0 30px rgba(26, 110, 168, 0.35);
+  padding: 1.3rem 1.4rem 1.4rem;
+}
+
+.modal-panel p {
+  line-height: 1.55;
+}
+
+@media (max-width: 800px) {
+  .puesto {
+    grid-template-columns: 1fr;
+  }
+
+  .panel-lat {
+    border: 0;
+    border-bottom: 1px solid var(--linea);
+  }
+
+  .panel-datos {
+    border-left: 0;
+  }
+
+  .escala {
+    height: 4rem;
+  }
+
+  .escenario {
+    height: 70vh;
+  }
+
+  .bloque,
+  .barra,
+  .tira {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .fila {
+    grid-template-columns: 5.5rem 1fr auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .intro,
+  .reveal,
+  .barra-valor {
+    transition: none;
+  }
+
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+}

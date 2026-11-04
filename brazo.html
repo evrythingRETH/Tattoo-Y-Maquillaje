@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Brazo · Estudio de imagen</title>
+    <link rel="stylesheet" href="css/main.css" />
+  </head>
+  <body>
+    <a class="saltar-contenido" href="#detalle">Saltar al contenido</a>
+    <header class="barra">
+      <p class="marca">Estudio de imagen · Brazo</p>
+      <a class="volver" href="index.html">Volver al estudio</a>
+    </header>
+
+    <main id="detalle">
+      <section class="escenario escenario-fijo" aria-labelledby="titulo-brazo">
+        <h1 id="titulo-brazo">Brazo</h1>
+        <p id="estado-modelo" class="estado">Adquiriendo corte…</p>
+        <canvas id="escena" aria-label="Malla de brazo con su textura"></canvas>
+        <div class="formas" role="toolbar" aria-label="Malla de brazo">
+          <button type="button" data-src="assets/brazos/Brazo1.fbx" aria-pressed="true">Brazo 1</button>
+          <button type="button" data-src="assets/brazos/Brazo2.fbx" aria-pressed="false">Brazo 2</button>
+        </div>
+      </section>
+
+      <section class="bloque reveal" aria-labelledby="sec-trazo">
+        <div class="texto-bloque">
+          <h2 id="sec-trazo">Trazo</h2>
+          <p>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam
+            quis risus eget urna mollis ornare vel eu leo. Cum sociis natoque
+            penatibus et magnis dis parturient montes, nascetur ridiculus mus.
+          </p>
+        </div>
+        <figure class="grafica">
+          <figcaption>Horas ficticias por estilo de línea</figcaption>
+          <div
+            class="chart"
+            data-chart="barras"
+            data-serie="Fina:12,Bold:9,Puntillismo:16,Geométrica:7"
+          ></div>
+        </figure>
+      </section>
+
+      <section class="bloque reveal" aria-labelledby="sec-sesion">
+        <div class="texto-bloque">
+          <h2 id="sec-sesion">Sesión</h2>
+          <p>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras justo
+            odio, dapibus ac facilisis in, egestas eget quam. Donec id elit non
+            mi porta gravida at eget metus.
+          </p>
+        </div>
+        <figure class="grafica">
+          <figcaption>Cobertura ficticia de una manga, en porcentaje</figcaption>
+          <div
+            class="chart"
+            data-chart="linea"
+            data-serie="Semana 1:15,Semana 2:38,Semana 3:55,Semana 4:74,Semana 6:100"
+          ></div>
+        </figure>
+      </section>
+    </main>
+
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "./vendor/three.module.js"
+        }
+      }
+    </script>
+    <script type="module" src="js/detalle.js"></script>
+  </body>
+</html>

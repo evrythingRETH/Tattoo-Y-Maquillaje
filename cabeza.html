@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cabeza · Estudio de imagen</title>
+    <link rel="stylesheet" href="css/main.css" />
+  </head>
+  <body>
+    <a class="saltar-contenido" href="#detalle">Saltar al contenido</a>
+    <header class="barra">
+      <p class="marca">Estudio de imagen · Cabeza</p>
+      <a class="volver" href="index.html">Volver al estudio</a>
+    </header>
+
+    <main id="detalle">
+      <section class="escenario escenario-fijo" aria-labelledby="titulo-cabeza">
+        <h1 id="titulo-cabeza">Cabeza</h1>
+        <p id="estado-modelo" class="estado">Adquiriendo corte…</p>
+        <canvas id="escena" aria-label="Malla de cabeza con su textura"></canvas>
+        <div class="formas" role="toolbar" aria-label="Malla de cabeza">
+          <button type="button" data-src="assets/cabezas/Cabeza1/scene.gltf" aria-pressed="true">Cabeza 1</button>
+          <button type="button" data-src="assets/cabezas/Cabeza2/scene.gltf" aria-pressed="false">Cabeza 2</button>
+        </div>
+      </section>
+
+      <section class="bloque reveal" aria-labelledby="sec-pigmento">
+        <div class="texto-bloque">
+          <h2 id="sec-pigmento">Pigmento</h2>
+          <p>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent
+            commodo cursus magna, vel scelerisque nisl consectetur et. Vivamus
+            sagittis lacus vel augue laoreet rutrum faucibus dolor auctor.
+          </p>
+        </div>
+        <figure class="grafica">
+          <figcaption>Sesiones ficticias por técnica</figcaption>
+          <div
+            class="chart"
+            data-chart="barras"
+            data-serie="Delineado:18,Sombra:27,Labial:14,Ceja:22,Contour:11"
+          ></div>
+        </figure>
+      </section>
+
+      <section class="bloque reveal" aria-labelledby="sec-cura">
+        <div class="texto-bloque">
+          <h2 id="sec-cura">Curación</h2>
+          <p>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean
+            lacinia bibendum nulla sed consectetur. Maecenas faucibus mollis
+            interdum. Etiam porta sem malesuada magna mollis euismod.
+          </p>
+        </div>
+        <figure class="grafica">
+          <figcaption>Días ficticios hasta estabilizar el color</figcaption>
+          <div
+            class="chart"
+            data-chart="linea"
+            data-serie="Día 1:40,Día 3:62,Día 7:78,Día 14:90,Día 21:96"
+          ></div>
+        </figure>
+      </section>
+    </main>
+
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "./vendor/three.module.js"
+        }
+      }
+    </script>
+    <script type="module" src="js/detalle.js"></script>
+  </body>
+</html>

@@ -1,0 +1,11 @@
+Model Information:
+* title:	Realistic human head
+* source:	https://sketchfab.com/3d-models/realistic-human-head-04c9c8cdfc23425e80eb96d5fdf987b0
+* author:	Coniser (https://sketchfab.com/coniserojas)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Realistic human head" (https://sketchfab.com/3d-models/realistic-human-head-04c9c8cdfc23425e80eb96d5fdf987b0) by Coniser (https://sketchfab.com/coniserojas) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

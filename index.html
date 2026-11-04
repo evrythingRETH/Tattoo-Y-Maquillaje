@@ -3,20 +3,117 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Tattoo Y Maquillaje</title>
-    <link rel="stylesheet" href="main.css" />
+    <title>Estudio de imagen</title>
+    <link rel="stylesheet" href="css/main.css" />
   </head>
   <body>
-    <canvas id="escena"></canvas>
-    <header class="panel">
-      <p class="etiqueta">Quinto semestre · Laboratorio</p>
-      <h1>Tattoo Y Maquillaje</h1>
-      <p class="texto">
-        Página local con una escena de Three.js. Arrastra para girar el objeto y
-        usa la rueda del mouse para acercarte.
-      </p>
-    </header>
-    <script src="three.js"></script>
-    <script src="main.js"></script>
+    <a class="saltar-contenido" href="#contenido">Saltar al contenido</a>
+
+    <section id="intro" class="intro" aria-labelledby="intro-titulo">
+      <div class="intro-caja">
+        <p class="etiqueta">Consola de imagen</p>
+        <h1 id="intro-titulo">Estudio XR</h1>
+        <p>
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
+          eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
+          ad minim veniam, quis nostrud exercitation ullamco laboris.
+        </p>
+        <button type="button" id="saltar-intro">Abrir estudio</button>
+      </div>
+    </section>
+
+    <div id="app" class="app" hidden>
+      <header class="barra">
+        <nav class="menu-sistema" aria-label="Menú de la consola">
+          <button type="button" data-menu="archivo">Archivo</button>
+          <button type="button" data-menu="estudio">Estudio</button>
+          <button type="button" data-menu="vision">Visión</button>
+        </nav>
+        <p class="marca">Estudio de imagen</p>
+        <p class="serie" id="serie">XR-2040 · Ampliación</p>
+      </header>
+
+      <div class="puesto">
+        <aside class="panel-lat" aria-label="Modalidad">
+          <p class="placa-titulo">Modalidad</p>
+          <div class="modalidades" role="group" aria-label="Modalidad de color">
+            <button type="button" data-modo="ct">CT</button>
+            <button type="button" data-modo="xr" aria-pressed="true">XR</button>
+            <button type="button" data-modo="mr">MR</button>
+            <button type="button" data-modo="us">US</button>
+          </div>
+        </aside>
+
+        <main id="contenido">
+          <h1 class="solo-lectores" id="titulo-app" tabindex="-1">Figura en rayos X</h1>
+          <p class="pista" id="pista-figura">
+            Arrastra para girar. Cada zona también está en la tira inferior.
+          </p>
+          <div class="escenario">
+            <p id="estado-modelo" class="estado">Adquiriendo estudio…</p>
+            <canvas id="escena" aria-describedby="pista-figura"></canvas>
+            <div class="hotspots">
+              <button type="button" class="hotspot" data-zona="cabeza" id="hot-cabeza" hidden>Cabeza</button>
+              <button type="button" class="hotspot" data-zona="brazo" id="hot-brazo" hidden>Brazo</button>
+              <button type="button" class="hotspot" data-zona="pecho" id="hot-pecho" hidden>Pecho</button>
+            </div>
+          </div>
+        </main>
+
+        <aside class="panel-lat panel-datos" aria-label="Datos del estudio">
+          <p class="placa-titulo">Nivel de ampliación</p>
+          <p class="nivel" id="nivel">1.00</p>
+          <div class="zoom-controles">
+            <button type="button" id="alejar">−</button>
+            <button type="button" id="acercar">+</button>
+          </div>
+          <table>
+            <caption class="solo-lectores">Estudio de demostración</caption>
+            <tbody>
+              <tr><th scope="row">Estudio</th><td>Demostración</td></tr>
+              <tr><th scope="row">ID</th><td>DX-2040</td></tr>
+              <tr><th scope="row">Serie</th><td>Cuerpo XR</td></tr>
+              <tr><th scope="row">Corte</th><td>Vista 01</td></tr>
+            </tbody>
+          </table>
+          <div class="escala" aria-hidden="true"><span>K20</span><span>K100</span></div>
+        </aside>
+      </div>
+
+      <nav class="tira" aria-label="Zonas del cuerpo">
+        <button type="button" data-zona="cabeza">SC1 Cabeza</button>
+        <button type="button" data-zona="brazo">SC2 Brazo</button>
+        <button type="button" data-zona="pecho">SC3 Pecho</button>
+      </nav>
+    </div>
+
+    <div
+      id="modal"
+      class="modal"
+      hidden
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-titulo"
+    >
+      <div class="modal-panel">
+        <h2 id="modal-titulo">Pecho</h2>
+        <p>
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer
+          posuere erat a ante venenatis dapibus posuere velit aliquet. Cras
+          mattis consectetur purus sit amet fermentum. Donec ullamcorper nulla
+          non metus auctor fringilla.
+        </p>
+        <button type="button" id="cerrar-modal">Cerrar</button>
+      </div>
+    </div>
+
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "./vendor/three.module.js"
+        }
+      }
+    </script>
+    <script type="module" src="js/main.js"></script>
   </body>
 </html>
