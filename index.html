@@ -30,7 +30,7 @@
           <button type="button" data-menu="vision">Visión</button>
         </nav>
         <p class="marca">Estudio de imagen</p>
-        <p class="serie" id="serie">XR-2040 · Ampliación</p>
+        <p class="serie" id="serie">XR-2040 · Cuerpo</p>
       </header>
 
       <div class="puesto">
@@ -42,16 +42,43 @@
             <button type="button" data-modo="mr">MR</button>
             <button type="button" data-modo="us">US</button>
           </div>
+          <p class="modo-nota" id="modo-nota">Ampliación luminosa, lectura de contorno.</p>
         </aside>
 
         <main id="contenido">
           <h1 class="solo-lectores" id="titulo-app" tabindex="-1">Figura en rayos X</h1>
           <p class="pista" id="pista-figura">
-            Arrastra para girar. Cada zona también está en la tira inferior.
+            Arrastra para desplazar la vista arriba, abajo y a los lados. Mayús y arrastra para girar. Esc vuelve al cuerpo.
           </p>
-          <div class="escenario">
+          <div class="escenario" id="escenario">
             <p id="estado-modelo" class="estado">Adquiriendo estudio…</p>
             <canvas id="escena" aria-describedby="pista-figura"></canvas>
+            <div class="marco" aria-hidden="true"></div>
+            <p id="aviso" class="solo-lectores" aria-live="polite"></p>
+            <aside id="placa-zona" class="placa-zona" hidden>
+              <p class="placa-kicker" id="zona-kicker">SC1</p>
+              <h2 class="placa-nombre" id="zona-nombre">Cabeza</h2>
+              <p class="placa-nota" id="zona-nota"></p>
+              <a id="zona-lamina" class="lamina" hidden>Ver lámina</a>
+            </aside>
+            <p class="ayuda" id="ayuda">Arrastra para desplazar · Mayús para girar</p>
+            <aside id="panel-archivo" class="placa-zona placa-archivo" hidden>
+              <p class="placa-kicker">Archivo</p>
+              <h2 class="placa-nombre">DX-2040</h2>
+              <p class="placa-nota">Serie local del cuerpo. Sigue en esta consola hasta que cierres el archivo.</p>
+            </aside>
+            <button type="button" id="volver-cuerpo" class="volver-cuerpo volver-flotante" hidden>
+              <span class="volver-flecha" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="18" height="18">
+                  <path d="M15 6 L9 12 L15 18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M10 12 H19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                </svg>
+              </span>
+              <span class="volver-texto">
+                <strong>Volver al cuerpo</strong>
+                <small>Vista completa · Esc</small>
+              </span>
+            </button>
             <div class="hotspots">
               <button type="button" class="hotspot" data-zona="cabeza" id="hot-cabeza" hidden>Cabeza</button>
               <button type="button" class="hotspot" data-zona="brazo" id="hot-brazo" hidden>Brazo</button>
@@ -64,16 +91,22 @@
           <p class="placa-titulo">Nivel de ampliación</p>
           <p class="nivel" id="nivel">1.00</p>
           <div class="zoom-controles">
-            <button type="button" id="alejar">−</button>
-            <button type="button" id="acercar">+</button>
+            <button type="button" id="alejar" aria-label="Alejar">−</button>
+            <button type="button" id="acercar" aria-label="Acercar">+</button>
           </div>
+          <label class="control">Zoom
+            <input id="zoom-rango" type="range" min="70" max="600" value="100" aria-label="Nivel de zoom">
+          </label>
+          <label class="control">Foco
+            <input id="foco" type="range" min="0" max="100" value="100" aria-label="Foco de la imagen">
+          </label>
           <table>
             <caption class="solo-lectores">Estudio de demostración</caption>
             <tbody>
-              <tr><th scope="row">Estudio</th><td>Demostración</td></tr>
-              <tr><th scope="row">ID</th><td>DX-2040</td></tr>
-              <tr><th scope="row">Serie</th><td>Cuerpo XR</td></tr>
-              <tr><th scope="row">Corte</th><td>Vista 01</td></tr>
+              <tr><th scope="row">Estudio</th><td id="dato-estudio">Demostración</td></tr>
+              <tr><th scope="row">ID</th><td id="dato-id">DX-2040</td></tr>
+              <tr><th scope="row">Serie</th><td id="dato-serie">Cuerpo</td></tr>
+              <tr><th scope="row">Corte</th><td id="dato-corte">Vista completa</td></tr>
             </tbody>
           </table>
           <div class="escala" aria-hidden="true"><span>K20</span><span>K100</span></div>
@@ -81,30 +114,10 @@
       </div>
 
       <nav class="tira" aria-label="Zonas del cuerpo">
-        <button type="button" data-zona="cabeza">SC1 Cabeza</button>
-        <button type="button" data-zona="brazo">SC2 Brazo</button>
-        <button type="button" data-zona="pecho">SC3 Pecho</button>
+        <button type="button" data-zona="cabeza" aria-pressed="false"><span class="tira-codigo">SC1</span><span class="tira-nombre">Cabeza</span></button>
+        <button type="button" data-zona="brazo" aria-pressed="false"><span class="tira-codigo">SC2</span><span class="tira-nombre">Brazo</span></button>
+        <button type="button" data-zona="pecho" aria-pressed="false"><span class="tira-codigo">SC3</span><span class="tira-nombre">Pecho</span></button>
       </nav>
-    </div>
-
-    <div
-      id="modal"
-      class="modal"
-      hidden
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="modal-titulo"
-    >
-      <div class="modal-panel">
-        <h2 id="modal-titulo">Pecho</h2>
-        <p>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer
-          posuere erat a ante venenatis dapibus posuere velit aliquet. Cras
-          mattis consectetur purus sit amet fermentum. Donec ullamcorper nulla
-          non metus auctor fringilla.
-        </p>
-        <button type="button" id="cerrar-modal">Cerrar</button>
-      </div>
     </div>
 
     <script type="importmap">

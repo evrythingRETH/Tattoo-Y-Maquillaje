@@ -6,31 +6,59 @@
     <title>Brazo · Estudio de imagen</title>
     <link rel="stylesheet" href="css/main.css" />
   </head>
-  <body>
-    <a class="saltar-contenido" href="#detalle">Saltar al contenido</a>
+  <body class="pagina-corte">
+    <a class="saltar-contenido" href="#datos">Saltar al contenido</a>
     <header class="barra">
-      <p class="marca">Estudio de imagen · Brazo</p>
-      <a class="volver" href="index.html">Volver al estudio</a>
+      <p class="marca" id="marca">Estudio de imagen · Brazo</p>
+      <a class="volver volver-cuerpo" href="index.html">
+        <span class="volver-flecha" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="18" height="18">
+            <path d="M15 6 L9 12 L15 18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M10 12 H19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <span class="volver-texto">
+          <strong>Volver al cuerpo</strong>
+          <small>Figura principal</small>
+        </span>
+      </a>
     </header>
 
-    <main id="detalle">
-      <section class="escenario escenario-fijo" aria-labelledby="titulo-brazo">
-        <h1 id="titulo-brazo">Brazo</h1>
+    <main id="detalle" class="corte">
+      <section class="visor" aria-label="Visor de brazo">
+        <div class="escenario escenario-corte">
         <p id="estado-modelo" class="estado">Adquiriendo corte…</p>
         <canvas id="escena" aria-label="Malla de brazo con su textura"></canvas>
+        <div class="marco" aria-hidden="true"></div>
+        <p class="ayuda">Arrastra para desplazarte · rueda para acercar</p>
+      </div>
+      <div class="controles-corte">
         <div class="formas" role="toolbar" aria-label="Malla de brazo">
-          <button type="button" data-src="assets/brazos/Brazo1.fbx" aria-pressed="true">Brazo 1</button>
-          <button type="button" data-src="assets/brazos/Brazo2.fbx" aria-pressed="false">Brazo 2</button>
+          <button type="button" data-src="assets/brazos/Brazo1.fbx" data-titulo="Brazo 1" data-nota="Manga en línea fina. Recorre el volumen arrastrando el cursor." data-relato="La primera manga trabaja la línea fina sobre el brazo. Desplaza la vista para seguir el trazo a lo largo del volumen, de lado a lado y de arriba abajo." aria-pressed="true"><span class="tira-codigo">Corte 01</span><span class="tira-nombre">Brazo 1</span></button>
+          <button type="button" data-src="assets/brazos/Brazo2.fbx" data-titulo="Brazo 2" data-nota="Segunda manga. El trazo cambia y la vista se puede recorrer." data-relato="La segunda manga cambia el peso del trazo. La consola conserva la misma luz y el brazo que miras es otro." aria-pressed="false"><span class="tira-codigo">Corte 02</span><span class="tira-nombre">Brazo 2</span></button>
         </div>
+        <label class="control">Zoom
+          <input id="zoom-rango" type="range" min="0" max="100" value="64" aria-label="Zoom del corte">
+        </label>
+        <label class="control">Foco
+          <input id="foco" type="range" min="0" max="100" value="100" aria-label="Foco del corte">
+        </label>
+        <label class="control">Girar
+          <input id="girar" type="range" min="0" max="100" value="50" aria-label="Giro manual del modelo">
+        </label>
+      </div>
       </section>
 
+      <aside id="datos" class="datos-corte">
+        <h1 id="titulo-corte">Brazo 1</h1>
+        <p id="leyenda" class="leyenda-datos">Manga en línea fina. Recorre el volumen arrastrando el cursor.</p>
       <section class="bloque reveal" aria-labelledby="sec-trazo">
         <div class="texto-bloque">
           <h2 id="sec-trazo">Trazo</h2>
-          <p>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam
-            quis risus eget urna mollis ornare vel eu leo. Cum sociis natoque
-            penatibus et magnis dis parturient montes, nascetur ridiculus mus.
+          <p id="relato">
+            La primera manga trabaja la línea fina sobre el brazo. Desplaza la
+            vista para seguir el trazo a lo largo del volumen, de lado a lado y
+            de arriba abajo.
           </p>
         </div>
         <figure class="grafica">
@@ -61,6 +89,7 @@
           ></div>
         </figure>
       </section>
+      </aside>
     </main>
 
     <script type="importmap">

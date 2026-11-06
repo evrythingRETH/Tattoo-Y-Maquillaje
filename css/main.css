@@ -185,6 +185,14 @@ h2 {
   padding: 0.3rem 0.45rem;
 }
 
+.modo-nota {
+  margin: 0.7rem 0 0;
+  color: var(--acento);
+  font-size: 0.75rem;
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+}
+
 .modalidades button[aria-pressed="true"],
 .menu-sistema button[aria-pressed="true"],
 .tira button[aria-pressed="true"],
@@ -248,16 +256,196 @@ body.vision-clara {
 
 .escenario {
   position: relative;
-  height: calc(100vh - 6.4rem);
+  height: calc(100vh - 8.4rem);
+  overflow: hidden;
   background:
     radial-gradient(circle at 50% 45%, rgba(26, 110, 168, 0.22), transparent 55%),
     var(--fondo);
 }
 
-.escenario canvas {
+.escenario canvas,
+.escenario-fijo canvas {
   display: block;
   width: 100%;
   height: 100%;
+  cursor: grab;
+  touch-action: none;
+}
+
+.escenario canvas.tomando,
+.escenario-fijo canvas.tomando {
+  cursor: grabbing;
+}
+
+.marco {
+  position: absolute;
+  inset: 0.7rem;
+  z-index: 2;
+  pointer-events: none;
+  background:
+    linear-gradient(var(--linea), var(--linea)) 0 0 / 22px 1px no-repeat,
+    linear-gradient(var(--linea), var(--linea)) 0 0 / 1px 22px no-repeat,
+    linear-gradient(var(--linea), var(--linea)) 100% 0 / 22px 1px no-repeat,
+    linear-gradient(var(--linea), var(--linea)) 100% 0 / 1px 22px no-repeat,
+    linear-gradient(var(--linea), var(--linea)) 0 100% / 22px 1px no-repeat,
+    linear-gradient(var(--linea), var(--linea)) 0 100% / 1px 22px no-repeat,
+    linear-gradient(var(--linea), var(--linea)) 100% 100% / 22px 1px no-repeat,
+    linear-gradient(var(--linea), var(--linea)) 100% 100% / 1px 22px no-repeat;
+}
+
+.ayuda {
+  position: absolute;
+  z-index: 3;
+  left: 0.85rem;
+  bottom: 0.85rem;
+  margin: 0;
+  max-width: 13rem;
+  color: var(--acento);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height: 1.35;
+  pointer-events: none;
+}
+
+.escenario.en-zona .ayuda {
+  bottom: 4.6rem;
+}
+
+.placa-archivo {
+  right: auto;
+  left: 0.85rem;
+  top: 3rem;
+}
+
+.control {
+  display: grid;
+  gap: 0.28rem;
+  margin: 0 0 0.75rem;
+  color: var(--acento);
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.control input[type="range"] {
+  width: 100%;
+  margin: 0;
+  accent-color: var(--marca);
+  cursor: pointer;
+}
+
+.placa-zona {
+  position: absolute;
+  z-index: 4;
+  top: 0.85rem;
+  right: 0.85rem;
+  width: min(16.5rem, calc(100% - 1.7rem));
+  padding: 0.85rem 0.95rem 0.95rem;
+  background: rgba(7, 19, 28, 0.92);
+  border: 1px solid var(--linea);
+  box-shadow: 0 0 28px rgba(26, 110, 168, 0.28);
+}
+
+.placa-kicker {
+  margin: 0;
+  color: var(--acento);
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.placa-nombre {
+  margin: 0.2rem 0 0.45rem;
+  color: var(--foco);
+  font-size: 1.35rem;
+}
+
+.placa-nota {
+  margin: 0;
+  color: var(--texto);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+a.lamina {
+  display: inline-block;
+  margin-top: 0.75rem;
+  color: var(--texto);
+  background: transparent;
+  border: 1px solid var(--linea);
+  border-radius: 2px;
+  padding: 0.4rem 0.7rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+
+a.lamina:hover {
+  background: var(--panel-2);
+  border-color: var(--acento);
+}
+
+.volver-cuerpo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.45rem 0.95rem 0.45rem 0.45rem;
+  border-color: var(--acento);
+  border-radius: 999px;
+  background: rgba(4, 16, 24, 0.9);
+  box-shadow: 0 0 24px rgba(26, 110, 168, 0.35);
+  text-align: left;
+}
+
+.volver-cuerpo[hidden],
+.placa-zona[hidden],
+a.lamina[hidden] {
+  display: none;
+}
+
+.volver-flecha {
+  width: 2.3rem;
+  height: 2.3rem;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--linea);
+  border-radius: 50%;
+  color: var(--marca);
+  background: rgba(12, 49, 72, 0.55);
+}
+
+.volver-texto strong {
+  display: block;
+  color: var(--foco);
+  font-size: 0.92rem;
+  font-weight: 560;
+  letter-spacing: 0.03em;
+}
+
+.volver-texto small {
+  display: block;
+  margin-top: 0.1rem;
+  color: var(--acento);
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.volver-flotante {
+  position: absolute;
+  z-index: 4;
+  left: 50%;
+  bottom: 0.85rem;
+  transform: translateX(-50%);
+}
+
+.volver-anclado {
+  position: absolute;
+  z-index: 4;
+  top: 0.85rem;
+  left: 0.85rem;
 }
 
 .pista {
@@ -286,6 +474,12 @@ body.vision-clara {
   display: none;
 }
 
+.hotspot[aria-pressed="true"] {
+  border-color: var(--marca);
+  background: rgba(26, 110, 168, 0.85);
+  color: var(--foco);
+}
+
 .estado {
   position: absolute;
   z-index: 2;
@@ -306,6 +500,29 @@ body.vision-clara {
   background: #041018;
 }
 
+.tira button,
+.formas button {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.12rem;
+  min-width: 7.2rem;
+  padding: 0.45rem 0.75rem;
+}
+
+.tira-codigo {
+  color: var(--acento);
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.tira-nombre {
+  color: var(--foco);
+  font-size: 0.95rem;
+  letter-spacing: 0.04em;
+}
+
 .escenario-fijo {
   position: relative;
   height: 100vh;
@@ -317,11 +534,36 @@ body.vision-clara {
   position: absolute;
   z-index: 2;
   left: 1rem;
-  bottom: 4.6rem;
+  bottom: 7.6rem;
   margin: 0;
   font-size: 1.4rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
+}
+
+.leyenda {
+  position: absolute;
+  z-index: 2;
+  left: 1rem;
+  right: 1rem;
+  bottom: 5.8rem;
+  margin: 0;
+  max-width: 28rem;
+  color: var(--acento);
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
+.escenario-fijo .estado {
+  top: 4.5rem;
+}
+
+.escenario-fijo .ayuda {
+  top: 0.95rem;
+  right: 0.95rem;
+  bottom: auto;
+  left: auto;
+  text-align: right;
 }
 
 .formas {
@@ -331,8 +573,10 @@ body.vision-clara {
   right: 0;
   bottom: 0.8rem;
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
   gap: 0.45rem;
+  padding: 0 0.8rem;
 }
 
 .formas button[aria-pressed="true"] {
@@ -450,6 +694,83 @@ body.vision-clara {
   line-height: 1.55;
 }
 
+.pagina-corte {
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.corte {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.visor {
+  min-width: 0;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  border-right: 1px solid var(--linea);
+}
+
+.escenario-corte {
+  height: 100%;
+  min-height: 0;
+}
+
+.controles-corte {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.65rem 0.75rem 0.75rem;
+  background: #041018;
+  border-top: 1px solid var(--linea);
+}
+
+.controles-corte .formas {
+  position: static;
+  padding: 0;
+  justify-content: flex-start;
+}
+
+.controles-corte .control {
+  margin: 0;
+}
+
+.datos-corte {
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  padding: 1.1rem 1.15rem 1.8rem;
+}
+
+.datos-corte h1 {
+  margin: 0 0 0.4rem;
+  font-size: 1.45rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.leyenda-datos {
+  margin: 0 0 0.4rem;
+  color: var(--acento);
+  line-height: 1.45;
+}
+
+.datos-corte .bloque {
+  grid-template-columns: 1fr;
+  max-width: none;
+  margin: 0;
+  padding: 1rem 0;
+}
+
+.pagina-corte .barra .volver-cuerpo {
+  position: static;
+  flex: none;
+}
+
 @media (max-width: 800px) {
   .puesto {
     grid-template-columns: 1fr;
@@ -468,13 +789,13 @@ body.vision-clara {
     height: 4rem;
   }
 
-  .escenario {
+  .puesto .escenario {
     height: 70vh;
   }
 
   .bloque,
-  .barra,
-  .tira {
+  .puesto ~ .tira,
+  body:not(.pagina-corte) .barra {
     display: flex;
     flex-direction: column;
   }
@@ -484,11 +805,32 @@ body.vision-clara {
   }
 }
 
+@media (max-width: 560px) {
+  .corte {
+    grid-template-columns: 1fr;
+    overflow: auto;
+  }
+
+  .visor {
+    min-height: 52vh;
+    border-right: 0;
+    border-bottom: 1px solid var(--linea);
+  }
+
+  .pagina-corte {
+    height: auto;
+    min-height: 100vh;
+    overflow: visible;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .intro,
   .reveal,
-  .barra-valor {
+  .barra-valor,
+  .placa-zona {
     transition: none;
+    animation: none;
   }
 
   .reveal {

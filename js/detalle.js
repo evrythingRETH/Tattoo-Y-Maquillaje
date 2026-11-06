@@ -6,7 +6,6 @@ import { preparar } from "./human.js";
 // Parámetros de las páginas Cabeza y Brazo.
 const ALTURA = 1.7; // tamaño del eje más largo del modelo
 const DISTANCIA = 2.6; // distancia de la cámara
-const GIRO = 0.006; // rotación automática; 0 la detiene
 const REVELAR = 0.25; // parte visible de la sección para que aparezca el texto
 
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -18,9 +17,13 @@ renderer.outputColorSpace = THREE.SRGBColorSpace;
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(40, 1, 0.05, 100);
+let distancia = DISTANCIA;
+let distanciaMeta = DISTANCIA;
+let panX = 0;
+let panY = 0;
 camera.position.set(0, 0, DISTANCIA);
-scene.add(new THREE.AmbientLight("#ffffff", 0.55));
-const luz = new THREE.DirectionalLight("#ffffff", 1.1);
+scene.add(new THREE.AmbientLight("#ffffff", 0.42));
+const luz = new THREE.DirectionalLight("#ffffff", 0.7);
 luz.position.set(3, 4, 5);
 scene.add(luz);
 
@@ -42,6 +45,17 @@ function mostrar(grupo) {
   if (objeto) scene.remove(objeto);
   objeto = grupo;
   objeto.rotation.y = 0;
+  grupo.traverse((nodo) => {
+    if (!nodo.isMesh) return;
+    nodo.frustumCulled = false;
+    if (nodo.geometry) nodo.geometry.computeBoundingSphere();
+    if (Array.isArray(nodo.material) && (!nodo.geometry.groups || nodo.geometry.groups.length === 0)) {
+      nodo.material = nodo.material.find((material) => material) || nodo.material[0];
+    }
+    [].concat(nodo.material).forEach((material) => {
+      if (material) material.side = THREE.DoubleSide;
+    });
+  });
   scene.add(objeto);
   estado.hidden = true;
 }
@@ -99,23 +113,124 @@ function cargar(url) {
   gltfLoader.load(url, (gltf) => listo(gltf.scene), undefined, fallo);
 }
 
+function aplicarFoco() {
+  const foco = document.getElementById("foco");
+  const n = foco ? Number(foco.value) / 100 : 1;
+  const px = (1 - n) * 7;
+  canvas.style.filter = px < 0.12 ? "none" : "blur(" + px.toFixed(2) + "px)";
+}
+
+function aplicarGiro() {
+  const girar = document.getElementById("girar");
+  if (objeto && girar) objeto.rotation.y = ((Number(girar.value) - 50) / 50) * Math.PI;
+}
+
+function distanciaDeZoom(valor) {
+  return 5.2 - (valor / 100) * 4.05;
+}
+
+function sincronizarZoom() {
+  const rango = document.getElementById("zoom-rango");
+  if (!rango || document.activeElement === rango) return;
+  rango.value = String(Math.round(((5.2 - distanciaMeta) / 4.05) * 100));
+}
+
+function personalizar(boton) {
+  const titulo = document.getElementById("titulo-corte");
+  const leyenda = document.getElementById("leyenda");
+  const marca = document.getElementById("marca");
+  const relato = document.getElementById("relato");
+  const nombre = boton.dataset.titulo || (titulo ? titulo.textContent : "");
+  if (titulo && boton.dataset.titulo) titulo.textContent = boton.dataset.titulo;
+  if (leyenda && boton.dataset.nota) leyenda.textContent = boton.dataset.nota;
+  if (relato && boton.dataset.relato) relato.textContent = boton.dataset.relato;
+  if (marca && nombre) marca.textContent = "Estudio de imagen · " + nombre;
+  if (nombre) document.title = nombre + " · Estudio de imagen";
+  panX = 0;
+  panY = 0;
+  distanciaMeta = DISTANCIA;
+  if (objeto) objeto.rotation.y = 0;
+  const girar = document.getElementById("girar");
+  const foco = document.getElementById("foco");
+  if (girar) girar.value = "50";
+  if (foco) foco.value = "100";
+  aplicarFoco();
+  sincronizarZoom();
+}
+
 document.querySelectorAll("[data-src]").forEach((boton) => {
   boton.addEventListener("click", () => {
     document.querySelectorAll("[data-src]").forEach((otro) => {
       otro.setAttribute("aria-pressed", String(otro === boton));
     });
+    personalizar(boton);
     cargar(boton.dataset.src);
   });
 });
 
 const inicial = document.querySelector('[data-src][aria-pressed="true"]');
-if (inicial) cargar(inicial.dataset.src);
+if (inicial) {
+  personalizar(inicial);
+  cargar(inicial.dataset.src);
+}
+
+let arrastre = false;
+let ultimoX = 0;
+let ultimoY = 0;
+
+canvas.addEventListener("pointerdown", (evento) => {
+  if (evento.button !== 0) return;
+  arrastre = true;
+  ultimoX = evento.clientX;
+  ultimoY = evento.clientY;
+  canvas.classList.add("tomando");
+  canvas.setPointerCapture(evento.pointerId);
+});
+function soltar() {
+  arrastre = false;
+  canvas.classList.remove("tomando");
+}
+canvas.addEventListener("pointerup", soltar);
+canvas.addEventListener("pointercancel", soltar);
+canvas.addEventListener("pointermove", (evento) => {
+  if (!arrastre) return;
+  const dx = evento.clientX - ultimoX;
+  const dy = evento.clientY - ultimoY;
+  ultimoX = evento.clientX;
+  ultimoY = evento.clientY;
+  const tope = Math.max(0.55, distancia * 0.55);
+  const escala = distancia * 0.0022;
+  panX = Math.max(-tope, Math.min(tope, panX - dx * escala));
+  panY = Math.max(-tope, Math.min(tope, panY + dy * escala));
+});
+canvas.addEventListener(
+  "wheel",
+  (evento) => {
+    evento.preventDefault();
+    const paso = evento.deltaY > 0 ? 0.28 : -0.28;
+    distanciaMeta = Math.max(1.15, Math.min(5.2, distanciaMeta + paso));
+    sincronizarZoom();
+  },
+  { passive: false }
+);
+document.getElementById("zoom-rango").addEventListener("input", () => {
+  distanciaMeta = distanciaDeZoom(Number(document.getElementById("zoom-rango").value));
+});
+document.getElementById("foco").addEventListener("input", aplicarFoco);
+document.getElementById("girar").addEventListener("input", aplicarGiro);
+document.addEventListener("keydown", (evento) => {
+  if (evento.key === "Escape") window.location.href = "index.html";
+});
 
 window.addEventListener("resize", tamano);
+if (window.ResizeObserver) new ResizeObserver(tamano).observe(canvas.parentElement);
 tamano();
 
 function cuadro() {
-  if (objeto && !reduceMotion) objeto.rotation.y += GIRO;
+  if (reduceMotion) distancia = distanciaMeta;
+  else distancia += (distanciaMeta - distancia) * 0.16;
+  camera.position.set(panX, panY, distancia);
+  camera.lookAt(panX, panY, 0);
   renderer.render(scene, camera);
   requestAnimationFrame(cuadro);
 }
