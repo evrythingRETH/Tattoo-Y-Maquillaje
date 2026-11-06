@@ -12,7 +12,7 @@ const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").match
 const canvas = document.getElementById("escena");
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-renderer.setClearColor(0x02060c, 1);
+renderer.setClearColor(0xf3f3f3, 1);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 
 const scene = new THREE.Scene();
@@ -226,6 +226,40 @@ window.addEventListener("resize", tamano);
 if (window.ResizeObserver) new ResizeObserver(tamano).observe(canvas.parentElement);
 tamano();
 
+canvas.tabIndex = 0;
+canvas.addEventListener("keydown", (evento) => {
+  const tecla = evento.key;
+  if (tecla === "ArrowLeft" || tecla === "ArrowRight" || tecla === "ArrowUp" || tecla === "ArrowDown") {
+    evento.preventDefault();
+    if (evento.shiftKey) {
+      const girar = document.getElementById("girar");
+      const delta = tecla === "ArrowLeft" ? -8 : tecla === "ArrowRight" ? 8 : 0;
+      if (girar && delta) {
+        girar.value = String(Math.max(0, Math.min(100, Number(girar.value) + delta)));
+        aplicarGiro();
+      }
+      return;
+    }
+    const paso = 28;
+    const tope = Math.max(0.55, distancia * 0.55);
+    const escala = distancia * 0.0022;
+    if (tecla === "ArrowLeft") panX = Math.max(-tope, Math.min(tope, panX + paso * escala));
+    if (tecla === "ArrowRight") panX = Math.max(-tope, Math.min(tope, panX - paso * escala));
+    if (tecla === "ArrowUp") panY = Math.max(-tope, Math.min(tope, panY - paso * escala));
+    if (tecla === "ArrowDown") panY = Math.max(-tope, Math.min(tope, panY + paso * escala));
+  }
+  if (tecla === "+" || tecla === "=") {
+    evento.preventDefault();
+    distanciaMeta = Math.max(1.15, distanciaMeta - 0.28);
+    sincronizarZoom();
+  }
+  if (tecla === "-" || tecla === "_") {
+    evento.preventDefault();
+    distanciaMeta = Math.min(5.2, distanciaMeta + 0.28);
+    sincronizarZoom();
+  }
+});
+
 function cuadro() {
   if (reduceMotion) distancia = distanciaMeta;
   else distancia += (distanciaMeta - distancia) * 0.16;
@@ -271,12 +305,18 @@ function montarGrafica(contenedor) {
     const fila = document.createElement("div");
     fila.className = "fila";
     fila.tabIndex = 0;
-    fila.setAttribute("role", "img");
+    fila.setAttribute("role", "button");
     fila.setAttribute("aria-label", punto.nombre + ": " + punto.valor + " de " + maximo);
     fila.innerHTML =
       "<span>" + punto.nombre + "</span>" +
       '<span class="barra-pista"><span class="barra-valor"></span></span>' +
       '<span class="valor">' + punto.valor + "</span>";
+    fila.addEventListener("click", () => marcarFila(fila, contenedor));
+    fila.addEventListener("keydown", (evento) => {
+      if (evento.key !== "Enter" && evento.key !== " ") return;
+      evento.preventDefault();
+      marcarFila(fila, contenedor);
+    });
     contenedor.append(fila);
     requestAnimationFrame(() => {
       fila.querySelector(".barra-valor").style.width = (punto.valor / maximo) * 100 + "%";
@@ -298,7 +338,7 @@ function montarLinea(contenedor, serie, maximo) {
   const trazo = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
   trazo.setAttribute("points", coords.map((punto) => punto.x + "," + punto.y).join(" "));
   trazo.setAttribute("fill", "none");
-  trazo.setAttribute("stroke", "#9ad7e4");
+  trazo.setAttribute("stroke", "#1a1a1a");
   trazo.setAttribute("stroke-width", "2");
   svg.append(trazo);
   coords.forEach((punto) => {
@@ -306,7 +346,7 @@ function montarLinea(contenedor, serie, maximo) {
     circulo.setAttribute("cx", punto.x);
     circulo.setAttribute("cy", punto.y);
     circulo.setAttribute("r", "5");
-    circulo.setAttribute("fill", "#d8f7ff");
+    circulo.setAttribute("fill", "#e10600");
     svg.append(circulo);
   });
   contenedor.append(svg);
@@ -316,7 +356,36 @@ function montarLinea(contenedor, serie, maximo) {
     boton.type = "button";
     boton.className = "punto";
     boton.textContent = punto.nombre + ": " + punto.valor;
+    boton.setAttribute("aria-pressed", "false");
+    boton.addEventListener("click", () => marcarPunto(boton, lista, contenedor, punto));
     lista.append(boton);
   });
   contenedor.append(lista);
+}
+
+function avisoDe(contenedor) {
+  let aviso = contenedor.querySelector(".aviso-grafica");
+  if (aviso) return aviso;
+  aviso = document.createElement("p");
+  aviso.className = "solo-lectores aviso-grafica";
+  aviso.setAttribute("aria-live", "polite");
+  contenedor.prepend(aviso);
+  return aviso;
+}
+
+function marcarFila(fila, contenedor) {
+  contenedor.querySelectorAll(".fila").forEach((otra) => otra.classList.remove("activa"));
+  fila.classList.add("activa");
+  avisoDe(contenedor).textContent = "Seleccionado " + fila.getAttribute("aria-label");
+}
+
+function marcarPunto(boton, lista, contenedor, punto) {
+  lista.querySelectorAll(".punto").forEach((otro) => otro.setAttribute("aria-pressed", "false"));
+  boton.setAttribute("aria-pressed", "true");
+  const circulos = contenedor.querySelectorAll("circle");
+  circulos.forEach((circulo) => {
+    const activo = circulo.getAttribute("cx") === String(punto.x) && circulo.getAttribute("cy") === String(punto.y);
+    circulo.setAttribute("r", activo ? "8" : "5");
+  });
+  avisoDe(contenedor).textContent = "Seleccionado " + boton.textContent;
 }

@@ -58,10 +58,13 @@ function cajaDeMallas(raiz) {
 }
 
 // alto: tamaño del eje más largo, en unidades de la escena.
-// rayosX: true solo para el cuerpo. Las cabezas y los brazos conservan su material.
-export function preparar(raiz, alto, rayosX) {
+// rayosX: true solo para el cuerpo en rayos X. orientar: "z" endereza un modelo tumbado.
+export function preparar(raiz, alto, rayosX, orientar) {
   const grupo = new THREE.Group();
   grupo.add(raiz);
+
+  if (orientar === "z") raiz.rotateX(-Math.PI / 2);
+  if (rayosX || orientar) raiz.rotateY(Math.PI);
 
   if (rayosX) {
     raiz.traverse((nodo) => {
@@ -69,13 +72,15 @@ export function preparar(raiz, alto, rayosX) {
       nodo.material = materialRayosX();
       nodo.frustumCulled = false;
     });
-    raiz.rotateY(Math.PI); // gira el cuerpo para verlo de frente
   } else {
     raiz.traverse((nodo) => {
       if (!nodo.isMesh) return;
+      nodo.frustumCulled = false;
       const materiales = [].concat(nodo.material);
       materiales.forEach((material) => {
-        if (material && material.map) material.map.colorSpace = THREE.SRGBColorSpace;
+        if (!material) return;
+        material.side = THREE.DoubleSide;
+        if (material.map) material.map.colorSpace = THREE.SRGBColorSpace;
       });
     });
   }
@@ -97,6 +102,11 @@ export function preparar(raiz, alto, rayosX) {
   anclaPecho.position.set(0, final.min.y + tam.y * 0.63, 0);
   anclaBrazo.position.set(final.max.x * 0.55, final.min.y + tam.y * 0.5, 0);
   grupo.add(anclaCabeza, anclaPecho, anclaBrazo);
+  grupo.traverse((nodo) => {
+    if (!nodo.isMesh || !nodo.geometry) return;
+    nodo.geometry.computeBoundingBox();
+    nodo.geometry.computeBoundingSphere();
+  });
 
   return { grupo, anclaCabeza, anclaPecho, anclaBrazo };
 }

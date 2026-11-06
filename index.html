@@ -25,9 +25,9 @@
     <div id="app" class="app" hidden>
       <header class="barra">
         <nav class="menu-sistema" aria-label="Menú de la consola">
-          <button type="button" data-menu="archivo">Archivo</button>
+          <button type="button" data-menu="archivo" aria-pressed="false">Archivo</button>
           <button type="button" data-menu="estudio">Estudio</button>
-          <button type="button" data-menu="vision">Visión</button>
+          <button type="button" data-menu="vision" aria-pressed="false">Visión</button>
         </nav>
         <p class="marca">Estudio de imagen</p>
         <p class="serie" id="serie">XR-2040 · Cuerpo</p>
@@ -37,22 +37,22 @@
         <aside class="panel-lat" aria-label="Modalidad">
           <p class="placa-titulo">Modalidad</p>
           <div class="modalidades" role="group" aria-label="Modalidad de color">
-            <button type="button" data-modo="ct">CT</button>
-            <button type="button" data-modo="xr" aria-pressed="true">XR</button>
-            <button type="button" data-modo="mr">MR</button>
-            <button type="button" data-modo="us">US</button>
+            <button type="button" data-modo="ct" aria-pressed="false">Esqueleto</button>
+            <button type="button" data-modo="xr" aria-pressed="true">Rayos X</button>
+            <button type="button" data-modo="mr" aria-pressed="false">Humano</button>
+            <button type="button" data-modo="us" aria-pressed="false">US</button>
           </div>
-          <p class="modo-nota" id="modo-nota">Ampliación luminosa, lectura de contorno.</p>
+          <p class="modo-nota" id="modo-nota">Volumen azul de rayos X.</p>
         </aside>
 
         <main id="contenido">
           <h1 class="solo-lectores" id="titulo-app" tabindex="-1">Figura en rayos X</h1>
           <p class="pista" id="pista-figura">
-            Arrastra para desplazar la vista arriba, abajo y a los lados. Mayús y arrastra para girar. Esc vuelve al cuerpo.
+            Arrastra para girar la figura. Con el foco en ella, las flechas también giran. Más y menos cambian el zoom. Esc vuelve al cuerpo.
           </p>
           <div class="escenario" id="escenario">
             <p id="estado-modelo" class="estado">Adquiriendo estudio…</p>
-            <canvas id="escena" aria-describedby="pista-figura"></canvas>
+            <canvas id="escena" tabindex="0" aria-label="Figura del cuerpo. Arrastra o usa las flechas para girar." aria-describedby="pista-figura"></canvas>
             <div class="marco" aria-hidden="true"></div>
             <p id="aviso" class="solo-lectores" aria-live="polite"></p>
             <aside id="placa-zona" class="placa-zona" hidden>
@@ -61,7 +61,7 @@
               <p class="placa-nota" id="zona-nota"></p>
               <a id="zona-lamina" class="lamina" hidden>Ver lámina</a>
             </aside>
-            <p class="ayuda" id="ayuda">Arrastra para desplazar · Mayús para girar</p>
+            <p class="ayuda" id="ayuda">Arrastra para girar</p>
             <aside id="panel-archivo" class="placa-zona placa-archivo" hidden>
               <p class="placa-kicker">Archivo</p>
               <h2 class="placa-nombre">DX-2040</h2>
@@ -79,6 +79,17 @@
                 <small>Vista completa · Esc</small>
               </span>
             </button>
+            <div id="senal" class="senal" hidden>
+              <svg class="senal-svg" aria-hidden="true">
+                <line id="senal-linea"></line>
+                <polyline id="senal-punta"></polyline>
+              </svg>
+              <p id="senal-texto" class="senal-texto">
+                <span>Lorem ipsum dolor sit amet,</span>
+                <span>consectetur adipiscing elit.</span>
+                <span>Sed do eiusmod tempor.</span>
+              </p>
+            </div>
             <div class="hotspots">
               <button type="button" class="hotspot" data-zona="cabeza" id="hot-cabeza" hidden>Cabeza</button>
               <button type="button" class="hotspot" data-zona="brazo" id="hot-brazo" hidden>Brazo</button>

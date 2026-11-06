@@ -9,7 +9,11 @@ const ZOOM_MS = 1680; // acercamiento a una zona
 const DOLLY_MS = 420; // rueda y botones +/−
 const ALTURA_CUERPO = 2.3;
 const GIRO = 0.008;
-const MODELO = "assets/human/human.glb";
+const CUERPOS = {
+  ct: { url: "assets/human/skeleton.gltf", rayos: false, orientar: "z", hueso: true },
+  xr: { url: "assets/human/human.glb", rayos: true },
+  mr: { url: "assets/human/guy/scene.gltf", rayos: false, orientar: "y" },
+};
 const CAMARA = {
   inicio: [0, 0.15, 3.6],
   mirada: [0, 0.1, 0],
@@ -53,10 +57,10 @@ const ZONAS = {
 };
 
 const MODOS = {
-  xr: { etiqueta: "XR", nota: "Ampliación luminosa, lectura de contorno.", filtro: "none" },
-  ct: { etiqueta: "CT", nota: "Contraste alto, como un corte denso.", filtro: "contrast(1.35) saturate(0.7)" },
-  mr: { etiqueta: "MR", nota: "Tono desplazado para leer otro tejido.", filtro: "hue-rotate(280deg) saturate(1.3)" },
-  us: { etiqueta: "US", nota: "Eco suave, otra capa del mismo estudio.", filtro: "hue-rotate(90deg) saturate(1.2)" },
+  xr: { etiqueta: "XR", nota: "Volumen azul de rayos X.", filtro: "none" },
+  ct: { etiqueta: "CT", nota: "Esqueleto del cuerpo.", filtro: "none" },
+  mr: { etiqueta: "MR", nota: "Persona con su textura.", filtro: "none" },
+  us: { etiqueta: "US", nota: "La misma malla, con menos luz.", filtro: "contrast(0.82) brightness(0.78)" },
 };
 
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -65,7 +69,6 @@ const app = document.getElementById("app");
 
 function mostrarFigura() {
   if (intro.hidden) return;
-  sessionStorage.setItem("intro-vista", "1");
   intro.hidden = true;
   app.hidden = false;
   document.getElementById("titulo-app").focus();
@@ -82,18 +85,18 @@ function cerrarIntro() {
   window.setTimeout(mostrarFigura, FADE_MS);
 }
 
-if (sessionStorage.getItem("intro-vista")) {
-  mostrarFigura();
-} else {
-  document.getElementById("saltar-intro").addEventListener("click", cerrarIntro);
-  window.setTimeout(cerrarIntro, INTRO_MS);
-}
+sessionStorage.removeItem("intro-vista");
+document.getElementById("saltar-intro").addEventListener("click", cerrarIntro);
+window.setTimeout(cerrarIntro, INTRO_MS);
+window.addEventListener("pageshow", (evento) => {
+  if (evento.persisted) window.location.reload();
+});
 
 const canvas = document.getElementById("escena");
 const escenario = document.getElementById("escenario");
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-renderer.setClearColor(0x02060c, 1);
+renderer.setClearColor(0xf3f3f3, 1);
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(CAMARA.fov, 1, 0.05, 100);
@@ -108,21 +111,61 @@ camera.position.copy(camaraInicio);
 const estado = document.getElementById("estado-modelo");
 let figura = null;
 let modoActual = "xr";
+let cuerpoActual = "xr";
 let zonaActiva = null;
 let ampliacion = 1;
+const cuerposListos = new Map();
+const loaderCuerpo = new GLTFLoader();
 
-new GLTFLoader().load(
-  MODELO,
-  (gltf) => {
-    figura = preparar(gltf.scene, ALTURA_CUERPO, true);
-    scene.add(figura.grupo);
-    estado.hidden = true;
-  },
-  undefined,
-  () => {
-    estado.textContent = "No se pudo adquirir el estudio.";
+scene.add(new THREE.AmbientLight("#ffffff", 0.65));
+const luzCuerpo = new THREE.DirectionalLight("#ffffff", 1.05);
+luzCuerpo.position.set(3, 5, 4);
+scene.add(luzCuerpo);
+
+function mostrarCuerpo(prep) {
+  const giroY = figura ? figura.grupo.rotation.y : 0;
+  const giroX = figura ? figura.grupo.rotation.x : 0;
+  if (figura) scene.remove(figura.grupo);
+  figura = prep;
+  figura.grupo.rotation.y = giroY;
+  figura.grupo.rotation.x = giroX;
+  scene.add(figura.grupo);
+  estado.hidden = true;
+}
+
+function cargarCuerpo(modo) {
+  const info = CUERPOS[modo];
+  if (!info) return;
+  cuerpoActual = modo;
+  if (cuerposListos.has(modo)) {
+    mostrarCuerpo(cuerposListos.get(modo));
+    return;
   }
-);
+  estado.hidden = false;
+  estado.textContent = "Adquiriendo estudio…";
+  loaderCuerpo.load(
+    info.url,
+    (gltf) => {
+      const prep = preparar(gltf.scene, ALTURA_CUERPO, info.rayos, info.orientar);
+      if (info.hueso) {
+        prep.grupo.traverse((nodo) => {
+          if (!nodo.isMesh) return;
+          [].concat(nodo.material).forEach((material) => {
+            if (material && !material.map && material.color) material.color.set("#d9d0c1");
+          });
+        });
+      }
+      cuerposListos.set(modo, prep);
+      if (cuerpoActual === modo) mostrarCuerpo(prep);
+    },
+    undefined,
+    () => {
+      if (cuerpoActual === modo) estado.textContent = "No se pudo adquirir el estudio.";
+    }
+  );
+}
+
+cargarCuerpo("xr");
 
 const anclas = { cabeza: "anclaCabeza", brazo: "anclaBrazo", pecho: "anclaPecho" };
 const offsetLocal = new THREE.Vector3();
@@ -241,7 +284,7 @@ function escribirNivel() {
 function escribirSerie() {
   const modo = MODOS[modoActual];
   const serie = document.getElementById("serie");
-  const vision = document.body.classList.contains("vision-clara") ? " · clara" : "";
+  const vision = document.body.classList.contains("tema-oscuro") ? " · invertida" : "";
   if (zonaActiva) {
     serie.textContent = modo.etiqueta + "-2040 · " + ZONAS[zonaActiva].nombre + vision;
   } else {
@@ -264,7 +307,7 @@ function personalizar(zona) {
     escenario.classList.remove("en-zona");
     document.getElementById("dato-serie").textContent = "Cuerpo";
     document.getElementById("dato-corte").textContent = "Vista completa";
-    ayuda.textContent = "Arrastra para desplazar · Mayús para girar";
+    ayuda.textContent = "Arrastra para girar";
     document.getElementById("aviso").textContent = "Vista del cuerpo completo.";
     escribirSerie();
     return;
@@ -278,7 +321,7 @@ function personalizar(zona) {
   document.getElementById("zona-nota").textContent = info.nota;
   document.getElementById("dato-serie").textContent = info.serie;
   document.getElementById("dato-corte").textContent = info.corte;
-  ayuda.textContent = "Arrastra para recorrer este corte";
+  ayuda.textContent = "Arrastra para girar este corte";
   document.getElementById("aviso").textContent = info.nombre + ". " + info.nota;
   if (info.pagina) {
     lamina.hidden = false;
@@ -353,6 +396,174 @@ function tamano() {
   renderer.setSize(ancho, alto, false);
 }
 
+const raycaster = new THREE.Raycaster();
+const puntero = new THREE.Vector2();
+const senal = document.getElementById("senal");
+const senalTexto = document.getElementById("senal-texto");
+const senalLinea = document.getElementById("senal-linea");
+const senalPunta = document.getElementById("senal-punta");
+const cajaCuerpo = new THREE.Box3();
+const esquinaCuerpo = new THREE.Vector3();
+const columnaCuerpo = new THREE.Vector3();
+
+const TEXTOS_CUERPO = {
+  cuello: ["Cuello", "Lorem ipsum dolor sit amet,", "consectetur adipiscing elit."],
+  hombroIzq: ["Hombro izquierdo", "Sed do eiusmod tempor,", "incididunt ut labore et dolore."],
+  hombroDer: ["Hombro derecho", "Ut enim ad minim veniam,", "quis nostrud exercitation."],
+  abdomen: ["Abdomen", "Duis aute irure dolor in", "reprehenderit in voluptate."],
+  flancoIzq: ["Flanco izquierdo", "Excepteur sint occaecat,", "cupidatat non proident."],
+  flancoDer: ["Flanco derecho", "Sunt in culpa qui officia", "deserunt mollit anim id."],
+  cadera: ["Cadera", "Nemo enim ipsam voluptatem,", "quia voluptas sit aspernatur."],
+  musloIzq: ["Muslo izquierdo", "Neque porro quisquam est,", "qui dolorem ipsum quia."],
+  musloDer: ["Muslo derecho", "Ut enim ad minima veniam,", "quis nostrum exercitationem."],
+  rodillaIzq: ["Rodilla izquierda", "Quis autem vel eum iure", "reprehenderit qui in ea."],
+  rodillaDer: ["Rodilla derecha", "At vero eos et accusamus,", "et iusto odio dignissimos."],
+  piernaIzq: ["Pierna izquierda", "Nam libero tempore, cum", "soluta nobis est eligendi."],
+  piernaDer: ["Pierna derecha", "Temporibus autem quibusdam", "et aut officiis debitis."],
+  pieIzq: ["Pie izquierdo", "Itaque earum rerum hic", "tenetur a sapiente delectus."],
+  pieDer: ["Pie derecho", "Ut aut reiciendis voluptatibus,", "maiores alias consequatur."],
+  manoIzq: ["Mano izquierda", "Nisi ut aliquid ex ea", "commodi consequatur quis."],
+  manoDer: ["Mano derecha", "Quis autem vel eum iure,", "reprehenderit qui in ea."],
+};
+
+let seccionActual = "";
+
+function ocultarSenal() {
+  senal.hidden = true;
+  seccionActual = "";
+}
+
+function escribirSeccion(clave) {
+  if (clave === seccionActual) return;
+  seccionActual = clave;
+  const lineas = TEXTOS_CUERPO[clave];
+  const spans = senalTexto.querySelectorAll("span");
+  lineas.forEach((linea, indice) => {
+    spans[indice].textContent = linea;
+  });
+}
+
+function claveSeccion(ny, lado, enEje, extremo) {
+  const sufijo = lado === "izq" ? "Izq" : "Der";
+  if (extremo && ny > 0.2 && ny < 0.56) return "mano" + sufijo;
+  if (ny < 0.18) return enEje ? "cuello" : "hombro" + sufijo;
+  if (ny < 0.36) return enEje ? "abdomen" : "flanco" + sufijo;
+  if (ny < 0.5) return enEje ? "cadera" : "muslo" + sufijo;
+  if (ny < 0.64) return "muslo" + sufijo;
+  if (ny < 0.78) return "rodilla" + sufijo;
+  if (ny < 0.9) return "pierna" + sufijo;
+  return "pie" + sufijo;
+}
+
+function esZonaNombrada(x, y) {
+  const umbral = Math.max(76, canvas.clientHeight * 0.13);
+  return ["hot-cabeza", "hot-brazo", "hot-pecho"].some((id) => {
+    const boton = document.getElementById(id);
+    if (boton.hidden) return false;
+    const bx = parseFloat(boton.style.left);
+    const by = parseFloat(boton.style.top);
+    return Math.hypot(bx - x, by - y) < umbral;
+  });
+}
+
+function limitesCuerpo(ancho, alto) {
+  cajaCuerpo.setFromObject(figura.grupo);
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+  for (let ix = 0; ix < 2; ix += 1) {
+    for (let iy = 0; iy < 2; iy += 1) {
+      for (let iz = 0; iz < 2; iz += 1) {
+        esquinaCuerpo.set(
+          ix ? cajaCuerpo.max.x : cajaCuerpo.min.x,
+          iy ? cajaCuerpo.max.y : cajaCuerpo.min.y,
+          iz ? cajaCuerpo.max.z : cajaCuerpo.min.z
+        ).project(camera);
+        if (esquinaCuerpo.z > 1) continue;
+        const sx = (esquinaCuerpo.x * 0.5 + 0.5) * ancho;
+        const sy = (-esquinaCuerpo.y * 0.5 + 0.5) * alto;
+        minX = Math.min(minX, sx);
+        minY = Math.min(minY, sy);
+        maxX = Math.max(maxX, sx);
+        maxY = Math.max(maxY, sy);
+      }
+    }
+  }
+  return { minX, minY, maxX, maxY };
+}
+
+function actualizarSenal(evento) {
+  if (!figura || arrastre || yendo) {
+    ocultarSenal();
+    return;
+  }
+  const rect = canvas.getBoundingClientRect();
+  const x = evento.clientX - rect.left;
+  const y = evento.clientY - rect.top;
+  if (x < 0 || y < 0 || x > rect.width || y > rect.height) {
+    ocultarSenal();
+    return;
+  }
+  puntero.x = (x / rect.width) * 2 - 1;
+  puntero.y = -(y / rect.height) * 2 + 1;
+  raycaster.setFromCamera(puntero, camera);
+  const golpes = raycaster.intersectObject(figura.grupo, true);
+  if (!golpes.length || esZonaNombrada(x, y)) {
+    ocultarSenal();
+    return;
+  }
+  const golpe = golpes[0].point.clone().project(camera);
+  const hx = (golpe.x * 0.5 + 0.5) * rect.width;
+  const hy = (-golpe.y * 0.5 + 0.5) * rect.height;
+  const limites = limitesCuerpo(rect.width, rect.height);
+  if (!Number.isFinite(limites.minX)) {
+    ocultarSenal();
+    return;
+  }
+  const anchoTexto = 200;
+  const altoTexto = 62;
+  const margen = 18;
+  columnaCuerpo.set(0, 0, 0);
+  figura.grupo.localToWorld(columnaCuerpo);
+  const columna = columnaCuerpo.project(camera);
+  const centroX = (columna.x * 0.5 + 0.5) * rect.width;
+  const altoCuerpo = Math.max(limites.maxY - limites.minY, 1);
+  const anchoCuerpo = Math.max(limites.maxX - limites.minX, 1);
+  const aLaDerecha = hx >= centroX;
+  const lado = aLaDerecha ? "der" : "izq";
+  const enEje = Math.abs(hx - centroX) < altoCuerpo * 0.07;
+  const extremo = Math.abs(hx - centroX) > anchoCuerpo * 0.32;
+  const ny = Math.min(1, Math.max(0, (hy - limites.minY) / altoCuerpo));
+  escribirSeccion(claveSeccion(ny, lado, enEje, extremo));
+  let tx = aLaDerecha ? limites.maxX + margen : limites.minX - margen - anchoTexto;
+  if (aLaDerecha) tx = Math.max(tx, centroX + 12);
+  else tx = Math.min(tx, centroX - anchoTexto - 12);
+  tx = Math.max(8, Math.min(rect.width - anchoTexto - 8, tx));
+  let ty = hy - altoTexto / 2;
+  ty = Math.max(8, Math.min(rect.height - altoTexto - 8, ty));
+  senalTexto.style.left = tx + "px";
+  senalTexto.style.top = ty + "px";
+  senalTexto.style.textAlign = aLaDerecha ? "left" : "right";
+  const xTexto = aLaDerecha ? tx : tx + anchoTexto;
+  const yTexto = ty + altoTexto / 2;
+  const angulo = Math.atan2(hy - yTexto, hx - xTexto);
+  const punta = 10;
+  const xFlecha = hx - Math.cos(angulo) * 2;
+  const yFlecha = hy - Math.sin(angulo) * 2;
+  senalLinea.setAttribute("x1", xTexto);
+  senalLinea.setAttribute("y1", yTexto);
+  senalLinea.setAttribute("x2", xFlecha - Math.cos(angulo) * punta);
+  senalLinea.setAttribute("y2", yFlecha - Math.sin(angulo) * punta);
+  const abrir = 0.42;
+  const ax = xFlecha - Math.cos(angulo - abrir) * punta;
+  const ay = yFlecha - Math.sin(angulo - abrir) * punta;
+  const bx = xFlecha - Math.cos(angulo + abrir) * punta;
+  const by = yFlecha - Math.sin(angulo + abrir) * punta;
+  senalPunta.setAttribute("points", xFlecha + "," + yFlecha + " " + ax + "," + ay + " " + xFlecha + "," + yFlecha + " " + bx + "," + by);
+  senal.hidden = false;
+}
+
 function proyectar(objeto, boton) {
   const centro = objeto.getWorldPosition(new THREE.Vector3()).project(camera);
   if (centro.z > 1) {
@@ -378,6 +589,7 @@ function desplazar(dx, dy) {
 
 canvas.addEventListener("pointerdown", (evento) => {
   if (evento.button !== 0 && evento.button !== 2) return;
+  ocultarSenal();
   arrastre = true;
   girando = evento.button === 2 || evento.shiftKey;
   ultimoX = evento.clientX;
@@ -392,19 +604,20 @@ function soltar() {
 }
 canvas.addEventListener("pointerup", soltar);
 canvas.addEventListener("pointercancel", soltar);
+canvas.addEventListener("pointerleave", ocultarSenal);
 canvas.addEventListener("contextmenu", (evento) => evento.preventDefault());
 canvas.addEventListener("pointermove", (evento) => {
+  if (!arrastre) actualizarSenal(evento);
+  else ocultarSenal();
   if (!arrastre) return;
   if (yendo) congelar();
   const dx = evento.clientX - ultimoX;
   const dy = evento.clientY - ultimoY;
   ultimoX = evento.clientX;
   ultimoY = evento.clientY;
-  if (girando || evento.shiftKey) {
-    if (figura) figura.grupo.rotation.y += dx * GIRO;
-    return;
-  }
-  desplazar(dx, dy);
+  if (!figura) return;
+  figura.grupo.rotation.y += dx * GIRO;
+  figura.grupo.rotation.x = Math.max(-1.1, Math.min(1.1, figura.grupo.rotation.x + dy * GIRO));
 });
 canvas.addEventListener(
   "wheel",
@@ -416,6 +629,27 @@ canvas.addEventListener(
 );
 window.addEventListener("resize", tamano);
 tamano();
+
+canvas.tabIndex = 0;
+canvas.addEventListener("keydown", (evento) => {
+  const tecla = evento.key;
+  if (tecla === "ArrowLeft" || tecla === "ArrowRight" || tecla === "ArrowUp" || tecla === "ArrowDown") {
+    evento.preventDefault();
+    if (!figura) return;
+    if (tecla === "ArrowLeft") figura.grupo.rotation.y += 0.12;
+    if (tecla === "ArrowRight") figura.grupo.rotation.y -= 0.12;
+    if (tecla === "ArrowUp") figura.grupo.rotation.x = Math.max(-1.1, figura.grupo.rotation.x - 0.08);
+    if (tecla === "ArrowDown") figura.grupo.rotation.x = Math.min(1.1, figura.grupo.rotation.x + 0.08);
+  }
+  if (tecla === "+" || tecla === "=") {
+    evento.preventDefault();
+    cambiarAmpliacion(0.28);
+  }
+  if (tecla === "-" || tecla === "_") {
+    evento.preventDefault();
+    cambiarAmpliacion(-0.28);
+  }
+});
 
 document.addEventListener("keydown", (evento) => {
   const alejado = Math.abs(ampliacion - 1) > 0.02;
@@ -461,8 +695,10 @@ document.querySelectorAll("[data-modo]").forEach((boton) => {
       otro.setAttribute("aria-pressed", String(otro === boton));
     });
     modoActual = boton.dataset.modo;
+    if (CUERPOS[modoActual]) cargarCuerpo(modoActual);
     aplicarFiltro();
     escribirSerie();
+    document.getElementById("aviso").textContent = MODOS[modoActual].nota;
   });
 });
 
@@ -473,17 +709,15 @@ document.querySelectorAll("[data-menu]").forEach((boton) => {
     boton.setAttribute("aria-pressed", String(!activo));
     if (boton.dataset.menu !== "archivo") document.getElementById("panel-archivo").hidden = true;
     if (boton.dataset.menu === "estudio") {
-      const foco = document.getElementById("foco");
-      foco.value = "100";
-      aplicarFiltro();
-      volverCuerpo();
+      window.location.reload();
+      return;
     }
     if (boton.dataset.menu === "vision") {
-      document.body.classList.toggle("vision-clara");
-      const clara = document.body.classList.contains("vision-clara");
-      renderer.setClearColor(clara ? 0x0a1c28 : 0x02060c, 1);
+      document.body.classList.toggle("tema-oscuro");
+      const oscuro = document.body.classList.contains("tema-oscuro");
+      renderer.setClearColor(oscuro ? 0x141414 : 0xf3f3f3, 1);
       escribirSerie();
-      document.getElementById("aviso").textContent = clara ? "Visión clara." : "Visión de consola.";
+      document.getElementById("aviso").textContent = oscuro ? "Colores invertidos." : "Colores en claro.";
     }
     if (boton.dataset.menu === "archivo") {
       document.getElementById("panel-archivo").hidden = activo;
